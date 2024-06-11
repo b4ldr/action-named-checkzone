@@ -1,9 +1,21 @@
 name: 'Named-Checkzone'
 author: 'Gustavo Ramos'
 description: 'Checks the syntax and integrity of ISC BIND/named zone files'
+inputs:
+  prefix:
+    description: The file prefix e.g. if the zone is example.org and the file is db.example.org the prefix should be '.db'
+    default: ''
+    required: false
+  zones_dir:
+    description: the zone directory relative to the git root
+    deafult: '.'
+    required: false
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  args:
+    - ${{ inputs.prefix }}
+    - ${{ inputs.zones_dir }}
 branding:
   icon: 'code'
   color: 'red'

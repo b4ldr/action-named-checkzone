@@ -1,20 +1,19 @@
-#!/bin/bash        
-set -ex
+#!/bin/bash
+set -exu
 
+prefix=$1
+zones_dir=$2
 
-if [ -z "$(which named-checkzone)" ]; then
-    echo "named-checkzone is missing. Ensure you have the bind9utils installed."
-    exit 1
-fi
-prefix='.*db.'
-find . -type f -name 'db.*' |
-while read zonefile; do
-    zone=`echo $zonefile | sed -e "s/^$prefix//"`
-    named-checkzone -d -k fail -n fail -m fail -M fail $zone $zonefile
-
-    if [ $? -ne 0 ]; then
-        exit $?
+pushd "$zones_dir"
+rc=0
+for zonefile in "${zones_dir}/${prefix}*"
+do
+    zone=${zonefile#"${prefix}"}
+    if ! named-checkzone -d -k fail -n fail -m fail -M fail $zone $zonefile
+    then
+      printf "%s: failed see output" "${zone}"
+      rc=1
     fi
 done
 
-exit
+exit $rc
