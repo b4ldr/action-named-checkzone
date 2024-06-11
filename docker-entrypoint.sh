@@ -1,13 +1,18 @@
 #!/bin/bash
-set -exu
+set -eu
 
 prefix=$1
 zones_dir=$2
+exclude=$3
 
-pushd "$zones_dir"
+pushd "${GITHUB_WORKSPACE}/${zones_dir}"
 rc=0
-for zonefile in "${zones_dir}/${prefix}*"
+for zonefile in "${prefix}"*
 do
+    if [[ "$zonefile" =~ "$exclude" ]]
+    then
+      continue
+    fi
     zone=${zonefile#"${prefix}"}
     if ! named-checkzone -d -k fail -n fail -m fail -M fail $zone $zonefile
     then
@@ -15,5 +20,5 @@ do
       rc=1
     fi
 done
-
+popd
 exit $rc
